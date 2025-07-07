@@ -1,0 +1,122 @@
+{
+  "fullName": "Alexandra Chen",
+  "professionalTitle": "Senior Java Backend Engineer",
+  "professionalSummary": "Passionate backend engineer with 5+ years of experience designing high-throughput distributed systems. Open-source contributor focused on clean architecture and mentoring junior developers. Strong advocate for DevOps best practices.",
+  "contactMethods": [
+    {
+      "type": "EMAIL",
+      "value": "alex.chen@example.com"
+    },
+    {
+      "type": "PHONE",
+      "value": "+1 (555) 123-4567"
+    },
+    {
+      "type": "LINKEDIN",
+      "value": "https://linkedin.com/in/alexandrachen"
+    },
+    {
+      "type": "GITHUB",
+      "value": "https://github.com/alexandrachen"
+    },
+    {
+      "type": "TIMEZONE",
+      "value": "PST (UTC-8)"
+    }
+  ],
+  "workExperiences": [
+    {
+      "companyName": "OpenSource Contributions",
+      "jobTitle": "Contributor (Part-time)",
+      "startDate": "2016-07",
+      "endDate": "2016-12",
+      "keyAchievements": [
+        "Contributed bug fixes and documentation to Apache Kafka (KIP-356) and Quarkus",
+        "Built a popular Java utility library (1.2K+ GitHub stars) for PDF generation",
+        "Wrote 5 technical tutorials on Spring Boot performance tuning (50K+ reads on Dev.to)"
+      ]
+    },
+    {
+      "companyName": "FinTech Innovations",
+      "jobTitle": "Junior Java Developer",
+      "startDate": "2017-01",
+      "endDate": "2018-05",
+      "keyAchievements": [
+        "Developed core banking transaction modules handling $5M+ daily volume using Spring Batch",
+        "Fixed 30+ critical bugs in legacy systems, improving system uptime from 99.2% to 99.9%",
+        "Automated regression testing with JUnit 5 and Mockito, increasing test coverage from 45% to 85%"
+      ]
+    },
+    {
+      "companyName": "CloudScale Solutions",
+      "jobTitle": "Backend Engineer",
+      "startDate": "2018-06",
+      "endDate": "2020-02",
+      "keyAchievements": [
+        "Designed and deployed 12+ RESTful microservices using Spring Cloud, reducing monolithic API latency by 60%",
+        "Implemented CI/CD pipelines with Jenkins and Docker, cutting deployment time from 2 hours to 15 minutes",
+        "Led database optimization effort that reduced AWS RDS costs by $12K/year through query tuning and indexing",
+        "Mentored 2 interns on Java best practices and code review workflows"
+      ]
+    },
+    {
+      "companyName": "TechNova Inc.",
+      "jobTitle": "Lead Java Developer",
+      "startDate": "2020-03",
+      "endDate": "2023-12",
+      "keyAchievements": [
+        "Designed scalable microservices handling 10K+ RPS using Spring Boot",
+        "Led migration to Kubernetes, reducing deployment times by 40%",
+        "Mentored 3 junior developers in clean architecture principles"
+      ]
+    }
+  ],
+  "educationHistory": [
+    {
+      "institutionName": "Stanford University",
+      "degree": "MSc Computer Science",
+      "fieldOfStudy": "Distributed Systems",
+      "startDate": "2016-09",
+      "endDate": "2018-05"
+    }
+  ],
+  "skillCategories": [
+    {
+      "categoryName": "Backend Development",
+      "skills": ["Java 17", "Spring Boot", "Hibernate", "JPA", "Kafka"]
+    },
+    {
+      "categoryName": "DevOps & Cloud",
+      "skills": ["AWS", "Docker", "Kubernetes", "Terraform", "GitHub Actions"]
+    },
+    {
+      "categoryName": "Databases",
+      "skills": ["PostgreSQL", "MongoDB", "Redis", "SQL Optimization"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "NATIVE"
+    },
+    {
+      "language": "French",
+      "proficiency": "INTERMEDIATE"
+    }
+  ],
+  "softSkills": [
+    "Technical Leadership",
+    "Agile/Scrum Coaching",
+    "Cross-team Collaboration"
+  ],
+  "hobbies": [
+    {
+      "name": "Open Source",
+      "description": "Apache Kafka contributor (KIP-356)"
+    },
+    {
+      "name": "Tech Writing",
+      "description": "50K+ reads on Java optimization guides"
+    }
+  ]
+}
