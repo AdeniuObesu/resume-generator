@@ -1,2 +1,5 @@
 target
 .vscode
+README.md
+*.png
+dependency-reduced-pom.xml
