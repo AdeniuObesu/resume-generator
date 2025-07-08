@@ -7,6 +7,7 @@ public record Resume(
     String professionalTitle,
     String professionalSummary,
     List<ContactMethod> contactMethods,
+    List<String> softSkills,
     List<WorkExperience> workExperiences,
     List<Education> educationHistory,
     List<SkillCategory> skillCategories,
