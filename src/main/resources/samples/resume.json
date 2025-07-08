@@ -20,8 +20,12 @@
       "value": "https://github.com/alexandrachen"
     },
     {
-      "type": "TIMEZONE",
-      "value": "PST (UTC-8)"
+      "type": "City",
+      "value": "London"
+    },
+    {
+      "type": "Country",
+      "value": "England"
     }
   ],
   "workExperiences": [
