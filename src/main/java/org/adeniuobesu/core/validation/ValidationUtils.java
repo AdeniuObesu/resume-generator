@@ -13,7 +13,7 @@ public final class ValidationUtils {
         "EMAIL", "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$",
         "PHONE", "^[+\\d\\s()-]{8,20}$",
         "URL", "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
-        "ISO_DATE", "^\\d{4}-(0[1-9]|1[0-2])$"  // YYYY-MM
+        "ISO_DATE", "^\\d{4}-(0[1-9]|1[0-2])$"
     );
 
     // String validation
@@ -64,6 +64,36 @@ public final class ValidationUtils {
     public static void requireNonNull(Object obj, String fieldName) {
         if (obj == null) {
             throw new InvalidResumeException(fieldName + " cannot be null");
+        }
+    }
+
+    /**
+     * Validates a list meets minimum size requirement
+     * @param list The collection to validate
+     * @param minSize Minimum required items
+     * @param fieldName Field name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static <T> void validateMinSize(List<T> list, int minSize, String fieldName) {
+        if (list != null && list.size() < minSize) {
+            throw new InvalidResumeException(
+                String.format("%s must have at least %d items", fieldName, minSize)
+            );
+        }
+    }
+
+    /**
+     * Validates a list meets maximum size requirement
+     * @param list The collection to validate
+     * @param maxSize Maximum allowed items
+     * @param fieldName Field name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static <T> void validateMaxSize(List<T> list, int maxSize, String fieldName) {
+        if (list != null && list.size() > maxSize) {
+            throw new InvalidResumeException(
+                String.format("%s cannot exceed %d items", fieldName, maxSize)
+            );
         }
     }
 }
