@@ -4,3 +4,5 @@ README.md
 *.png
 dependency-reduced-pom.xml
 *.txt
+local/
+output/
