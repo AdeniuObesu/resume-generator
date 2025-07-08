@@ -3,3 +3,4 @@ target
 README.md
 *.png
 dependency-reduced-pom.xml
+*.txt
