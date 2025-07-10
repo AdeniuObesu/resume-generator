@@ -1,6 +1,5 @@
 # Resume Generator Project
 
-Core Functionality
 This project transforms structured resume data (in JSON format) into professional, publication-ready documents across multiple formats. It takes a standardized JSON input containing a person's work history, education, skills, and contact information, then generates polished output documents including:
 * Print-ready PDF resumes with proper styling
 * Markdown versions for technical portfolios
