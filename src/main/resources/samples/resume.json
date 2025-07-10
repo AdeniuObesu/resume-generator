@@ -20,11 +20,11 @@
       "value": "https://github.com/alexandrachen"
     },
     {
-      "type": "City",
+      "type": "CITY",
       "value": "London"
     },
     {
-      "type": "Country",
+      "type": "COUNTRY",
       "value": "England"
     }
   ],
