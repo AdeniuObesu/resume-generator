@@ -1,4 +1,4 @@
-package org.adeniuobesu;
+package org.adeniuobesu.infrastrcture;
 
 public class Main {
     public static void main(String[] args) {

@@ -65,7 +65,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.adeniuobesu.cli.ResumeCLI</mainClass>
+                                    <mainClass>org.adeniuobesu.infrastructure.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
