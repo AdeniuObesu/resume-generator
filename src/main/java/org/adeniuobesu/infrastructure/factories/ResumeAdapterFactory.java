@@ -1,4 +1,4 @@
-package org.adeniuobesu.infrastrcture.factories;
+package org.adeniuobesu.infrastructure.factories;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
