@@ -1,76 +1,82 @@
-# Resume Generator Project
+# Resume Generator (Hexagonal Architecture)
 
-This project transforms structured resume data (in JSON format) into professional, publication-ready documents across multiple formats. It takes a standardized JSON input containing a person's work history, education, skills, and contact information, then generates polished output documents including:
-* Print-ready PDF resumes with proper styling
-* Markdown versions for technical portfolios
-* Web-friendly HTML profiles
-* Plain text for simple sharing
+A tribute to Uncle Bob — whose work shaped my thinking as a software engineer.
 
-## Project Goal
-The system ensures all output formats contain identical content while respecting each format's conventions - whether that's section headers in Markdown, page breaks in PDFs, or semantic HTML tags. Developers can add new output formats by implementing a single interface while maintaining all existing functionality.
+As a passionate believer in clean code and software craftsmanship, this project is the result of my deep dive into Clean Architecture by Robert C. Martin.
+It’s a résumé generator written in Java, structured with Hexagonal Architecture (Ports & Adapters) to ensure clarity, testability, and long-term maintainability.
+Currently CLI-based, but easily extendable to REST APIs, databases, or even AI-powered summarization.
 
-Example transformation:
-**resume.json or through CLI** → **Alex_Chen_Resume.pdf** + **Alex_Chen_Resume.md** + **Alex_Chen_Resume.html** + **Alex_Chen_Resume.txt**
+This isn’t just a tool — it’s a practical application of architectural principles I now carry with me as a developer.
 
-The project solves the problem of maintaining multiple resume versions manually while ensuring consistency across all formats.
+## ✨ Features
 
-A **clean architecture** implementation for generating professional resumes in multiple formats (PDF, Markdown, HTML, etc.) from a standardized JSON input. The system:
+- ✅ CLI-driven resume generation (`resume.json` ➜ `resume.pdf`)
+- ✅ Hexagonal architecture: domain logic is fully isolated from I/O concerns
+- ✅ Extensible output formats (PDF, HTML, JSON)
+- ✅ AI-ready: supports pluggable AI-based summary generation
+- ✅ Pure Java (no Spring) – fast startup, minimal dependencies
 
-- Provides **consistent, well-formatted outputs** across all formats  
-- Enables **easy extension** to new output formats  
-- Maintains **separation of concerns** between business logic and presentation  
-- Offers **customizable templates** for different industries/roles  
+---
 
-## Project Structure
-```plaintext
-org.adeniuobesu
-├── core/ # Business logic and domain models
-│ ├── models/ # Resume data structure (entities)
-│ └── services/ # Business rules and operations
-│
-├── ports/ # Interface definitions
-│ ├── InputPort.java # parsing contract
-│ └── OutputPort.java # Generation contract
-│
-├── adapters/
-│ ├── input/ # parsing implementations
-│ └── output/ # Format generators (PDF, Markdown, etc.)
-│
-└── main/ # Application configuration
+## 🚀 Getting Started
+
+### 📦 Prerequisites
+
+- Java 17+
+- Maven 3+
+
+### 🔧 Build
+
+```bash
+mvn clean package
 ```
-## Key Features
 
-1. **Multi-Format Support**
-    ```java
-        public interface OutputPort<T> {
-            void generate(T data);  // Unified interface, implemented by all adapters
-        }
-    ```
+### ▶️ Run CLI Mode
+```bash
+java -jar resume-generator-1.0.0.jar --json resume.json --output-dir ~/docs --format TEXT
+```
 
-* PDF (via Apache PDFBox)
-* Markdown (clean text formatting)
-* HTML (web-friendly version)
-* CLI (terminal preview)
-* ...etc
+### 🧪 Run Tests
+```bash
+mvn test
+```
 
-2. **Standardized Input**
-    ```json
-        {
-        "fullName": "Alexandra Chen",
-        "professionalTitle": "Senior Java Engineer",
-        "workExperiences": [
-            {
-            "companyName": "TechNova Inc.",
-            "jobTitle": "Lead Developer",
-            "startDate": "2020-03",
-            "keyAchievements": [
-                "Designed scalable microservices"
-            ]
-            }
-        ]
-        }
-    ```
-3. **Entensible Design**
-New formats require only:
-* Implementing OutputPort
-* Adding to OutputAdapterFactory
+## 📁 Project Structure (Hexagonal)
+```bash
+src/
+├── core/                  # Domain logic (models, services, exceptions, ports)
+│   ├── models/            # Resume, ContactMethod, etc.
+│   ├── validation/        # Domain validation logic
+│   └── ports/             # Input/Output contracts (interfaces)
+├── application/           # Use cases (e.g., BuildResumeUseCase)
+├── adapters/              # Implementations for input/output ports
+│   ├── input/
+│   │   ├── JSON           # Current json input adapter
+│   │   ├── cli            # Future CLI input adapter
+│   │   └── web            # Future REST adapter
+│   └── output/
+│       ├── pdf            # PDF generator
+│       └── json           # JSON file support
+│       └── ...            # As many as you want to implement...
+├── infrastructure/        # Composition root (Main.java, config)
+└── resources/
+    └── samples/           # Example JSON resumes
+```
+
+## 🧱 Clean Architecture Principles
+* Dependency Rule: Core domain knows nothing about frameworks, filesystems, or libraries.
+* Stable Core: Only interfaces inside the core; everything else plugs in.
+* Adapters = Replaceable: Swap CLI for Web, JSON for DB, or add AI summaries — no impact on core.
+* Testable: Business logic tested with mocked ports — no need to touch infrastructure.
+
+## 🛣️ Roadmap
+1. Add RESTful web interface
+2. Add database persistence (MySQL, PostgreSQL or MongoDB)
+3. Support more input formats (YAML, XML)
+4. UI layer (HTML/JS) to generate resumes visually
+5. Add HTML output adapter
+6. Integrate AI summary (e.g., OpenAI GPT)
+
+
+## 👨‍💻 Author
+Project by [@Moukhafi-Anass](https://github.com/adeniuobesu) — built to demonstrate true Clean Architecture in action.
