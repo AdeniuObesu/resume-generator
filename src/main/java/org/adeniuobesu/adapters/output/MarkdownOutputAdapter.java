@@ -1,20 +1,20 @@
-package org.adeniuobesu.core.output;
+package org.adeniuobesu.adapters.output;
 
 import java.nio.file.Path;
 
 import org.adeniuobesu.core.models.Resume;
 import org.adeniuobesu.core.ports.OutputPort;
 
-public class TextOutputAdapter implements OutputPort<Resume> {
+public class MarkdownOutputAdapter implements OutputPort<Resume> {
     private final Path outputPath;
 
-    public TextOutputAdapter(Path outputPath) {
+    public MarkdownOutputAdapter(Path outputPath) {
         this.outputPath = outputPath;
     }
 
     @Override
     public void generate(Resume obj) {
-        // generate a text file
+        System.out.println("Done!");
     }
     
 }

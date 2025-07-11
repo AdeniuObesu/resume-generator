@@ -4,15 +4,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
-import org.adeniuobesu.core.input.CliInputAdapter;
-import org.adeniuobesu.core.input.JsonInputAdapter;
+import org.adeniuobesu.adapters.input.CliInputAdapter;
+import org.adeniuobesu.adapters.input.JsonInputAdapter;
 import org.adeniuobesu.core.models.InputType;
 import org.adeniuobesu.core.models.OutputType;
 import org.adeniuobesu.core.models.Resume;
-import org.adeniuobesu.core.output.HtmlOutputAdapter;
-import org.adeniuobesu.core.output.MarkdownOutputAdapter;
-import org.adeniuobesu.core.output.PdfOutputAdapter;
-import org.adeniuobesu.core.output.TextOutputAdapter;
+import org.adeniuobesu.adapters.output.HtmlOutputAdapter;
+import org.adeniuobesu.adapters.output.MarkdownOutputAdapter;
+import org.adeniuobesu.adapters.output.PdfOutputAdapter;
+import org.adeniuobesu.adapters.output.TextOutputAdapter;
 import org.adeniuobesu.core.ports.InputPort;
 import org.adeniuobesu.core.ports.OutputPort;
 

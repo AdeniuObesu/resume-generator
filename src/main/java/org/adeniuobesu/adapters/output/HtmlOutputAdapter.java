@@ -1,4 +1,4 @@
-package org.adeniuobesu.core.output;
+package org.adeniuobesu.adapters.output;
 
 import java.nio.file.Path;
 

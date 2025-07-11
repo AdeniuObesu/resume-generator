@@ -1,4 +1,4 @@
-package org.adeniuobesu.core.input;
+package org.adeniuobesu.adapters.input;
 
 import java.io.File;
 import java.io.IOException;
