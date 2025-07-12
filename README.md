@@ -77,12 +77,12 @@ src/
 * Adapters = Replaceable: Swap CLI for Web, JSON for DB, or add AI summaries — no impact on core.
 * Testable: Business logic tested with mocked ports — no need to touch infrastructure.
 
-| Layer          | Knows About           | Never Knows About      |
-| -------------- | --------------------- | ---------------------- |
-| Core           | Business rules        | CLI, PDF, frameworks   |
-| Application    | Use cases, DTOs       | Infrastructure, UI     |
-| Adapters       | Port interfaces       | Domain logic internals |
-| Infrastructure | Factories, config     | Core implementation    |
+| Layer           | Knows About                           | Never Knows About             |
+|-----------------|---------------------------------------|-------------------------------|
+| Core            | Domain models, validation rules       | Frameworks, I/O, UI, adapters |
+| Application     | Use cases, DTOs, ports                | Infrastructure, concrete I/O  |
+| Adapters        | Application ports, DTOs, external I/O | Core internals, use cases     |
+| Infrastructure  | Composition root, factories, config   | Business rules, domain models |
 
 ### Layered dependencies (from inner to outer)
 
