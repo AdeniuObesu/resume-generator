@@ -8,91 +8,179 @@ import java.util.Map;
 import org.adeniuobesu.core.exceptions.InvalidResumeException;
 
 public final class ValidationUtils {
-    // Predefined regex patterns for common validations
-    private static final Map<String, String> REGEX_PATTERNS = Map.of(
+    // Regex patterns - made package-private for potential reuse
+    static final Map<String, String> REGEX_PATTERNS = Map.of(
         "EMAIL", "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$",
         "PHONE", "^[+\\d\\s()-]{8,20}$",
         "URL", "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
         "ISO_DATE", "^\\d{4}-(0[1-9]|1[0-2])$"
     );
 
-    // String validation
+    private static final String CANNOT_BE_EMPTY = "%s cannot be empty";
+    private static final String CANNOT_BE_NULL = "%s cannot be null";
+    private static final String LENGTH_RANGE = "%s must be %d-%d characters";
+    private static final String INVALID_FORMAT = "Invalid %s format";
+    private static final String MIN_ITEMS = "%s must have at least %d items";
+    private static final String MAX_ITEMS = "%s cannot exceed %d items";
+
+    // Private constructor to prevent instantiation
+    private ValidationUtils() {}
+
+    /**
+     * Validates string meets length requirements and is non-empty
+     * @param value The string to validate
+     * @param fieldName Descriptive name for error messages
+     * @param min Minimum length (inclusive)
+     * @param max Maximum length (inclusive)
+     * @throws InvalidResumeException if validation fails
+     */
     public static void validateString(String value, String fieldName, int min, int max) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new InvalidResumeException(fieldName + " cannot be empty");
-        }
+        requireNonEmpty(value, fieldName);
+        
         if (value.length() < min || value.length() > max) {
             throw new InvalidResumeException(
-                String.format("%s must be %d-%d characters", fieldName, min, max)
+                fieldName, 
+                String.format(LENGTH_RANGE, fieldName, min, max)
             );
         }
     }
 
-    // Collection validation
-    public static <T> void validateNonEmpty(List<T> list, String fieldName) {
-        if (list == null || list.isEmpty()) {
-            throw new InvalidResumeException(fieldName + " cannot be empty");
-        }
-    }
-
-    // Date validation (ISO-8601: YYYY-MM)
-    public static void validateIsoDate(String date, String fieldName) {
-        if (!date.matches(REGEX_PATTERNS.get("ISO_DATE"))) {
+    /**
+     * Validates collection is non-null and non-empty
+     * @param collection The collection to validate
+     * @param fieldName Descriptive name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static void validateNonEmpty(List<?> collection, String fieldName) {
+        if (collection == null || collection.isEmpty()) {
             throw new InvalidResumeException(
-                fieldName + " must be in YYYY-MM format"
+                fieldName,
+                String.format(CANNOT_BE_EMPTY, fieldName)
             );
         }
+    }
+
+    /**
+     * Validates date string is in correct ISO-8601 (YYYY-MM) format
+     * @param date The date string to validate
+     * @param fieldName Descriptive name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static void validateIsoDate(String date, String fieldName) {
+        requireNonEmpty(date, fieldName);
+
+        // Regex détendue : juste YYYY-MM
+        if (!date.matches("\\d{4}-\\d{2}")) {
+            throw new InvalidResumeException(
+                fieldName,
+                "must be in YYYY-MM format"
+            );
+        }
+
         try {
-            YearMonth.parse(date);  // Additional validation
+            YearMonth.parse(date);
         } catch (DateTimeParseException e) {
             throw new InvalidResumeException(
-                fieldName + " contains invalid date: " + date
+                fieldName,
+                "contains invalid date: " + date
             );
         }
     }
 
-    // Pattern-based validation
+    /**
+     * Validates string matches specified pattern
+     * @param value The string to validate
+     * @param fieldName Descriptive name for error messages
+     * @param patternKey Key for predefined regex pattern
+     * @throws InvalidResumeException if validation fails
+     */
     public static void validatePattern(String value, String fieldName, String patternKey) {
-        if (!value.matches(REGEX_PATTERNS.get(patternKey))) {
+        requireNonEmpty(value, fieldName);
+        
+        String pattern = REGEX_PATTERNS.get(patternKey);
+        if (pattern == null) {
+            throw new IllegalArgumentException("Unknown pattern key: " + patternKey);
+        }
+        
+        if (!value.matches(pattern)) {
             throw new InvalidResumeException(
-                String.format("Invalid %s format", fieldName)
+                fieldName,
+                String.format(INVALID_FORMAT, fieldName)
             );
         }
     }
 
-    // Null check with custom message
+    /**
+     * Validates object is non-null
+     * @param obj The object to validate
+     * @param fieldName Descriptive name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
     public static void requireNonNull(Object obj, String fieldName) {
         if (obj == null) {
-            throw new InvalidResumeException(fieldName + " cannot be null");
-        }
-    }
-
-    /**
-     * Validates a list meets minimum size requirement
-     * @param list The collection to validate
-     * @param minSize Minimum required items
-     * @param fieldName Field name for error messages
-     * @throws InvalidResumeException if validation fails
-     */
-    public static <T> void validateMinSize(List<T> list, int minSize, String fieldName) {
-        if (list != null && list.size() < minSize) {
             throw new InvalidResumeException(
-                String.format("%s must have at least %d items", fieldName, minSize)
+                fieldName,
+                String.format(CANNOT_BE_NULL, fieldName)
             );
         }
     }
 
     /**
-     * Validates a list meets maximum size requirement
-     * @param list The collection to validate
-     * @param maxSize Maximum allowed items
-     * @param fieldName Field name for error messages
+     * Validates string is non-null and non-empty
+     * @param value The string to validate
+     * @param fieldName Descriptive name for error messages
      * @throws InvalidResumeException if validation fails
      */
-    public static <T> void validateMaxSize(List<T> list, int maxSize, String fieldName) {
-        if (list != null && list.size() > maxSize) {
+    public static void requireNonEmpty(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
             throw new InvalidResumeException(
-                String.format("%s cannot exceed %d items", fieldName, maxSize)
+                fieldName,
+                String.format(CANNOT_BE_EMPTY, fieldName)
+            );
+        }
+    }
+
+    /**
+     * Validates collection meets minimum size requirement
+     * @param collection The collection to validate
+     * @param minSize Minimum required items
+     * @param fieldName Descriptive name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static void validateMinSize(List<?> collection, int minSize, String fieldName) {
+        requireNonNull(collection, fieldName);
+        
+        if (collection.size() < minSize) {
+            throw new InvalidResumeException(
+                fieldName,
+                String.format(MIN_ITEMS, fieldName, minSize)
+            );
+        }
+    }
+
+    /**
+     * Validates collection meets maximum size requirement
+     * @param collection The collection to validate
+     * @param maxSize Maximum allowed items
+     * @param fieldName Descriptive name for error messages
+     * @throws InvalidResumeException if validation fails
+     */
+    public static void validateMaxSize(List<?> collection, int maxSize, String fieldName) {
+        requireNonNull(collection, fieldName);
+        
+        if (collection.size() > maxSize) {
+            throw new InvalidResumeException(
+                fieldName,
+                String.format(MAX_ITEMS, fieldName, maxSize)
+            );
+        }
+    }
+    // TODO: add appropriate JavaDoc
+    public static void validateRange(int value, int min, int max, String fieldName) {
+        if (value < min || value > max) {
+            throw new InvalidResumeException(
+                fieldName,
+                String.format("must be between %d and %d", min, max)
             );
         }
     }

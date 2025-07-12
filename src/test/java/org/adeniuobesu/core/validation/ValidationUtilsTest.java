@@ -2,140 +2,184 @@ package org.adeniuobesu.core.validation;
 
 import org.adeniuobesu.core.exceptions.InvalidResumeException;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationUtilsTest {
 
-    // validateString tests
+    // validateString
     @Test
-    void validateString_shouldAcceptValidString() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateString("Valid", "Test Field", 2, 10));
+    void validateString_shouldPassForValidInput() {
+        assertDoesNotThrow(() ->
+            ValidationUtils.validateString("Computer Science", "Field", 2, 50)
+        );
     }
 
     @Test
-    void validateString_shouldRejectNull() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateString(null, "Test Field", 2, 10));
+    void validateString_shouldThrowForNull() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateString(null, "Field", 2, 50)
+        );
+        assertEquals("Field", ex.getField());
     }
 
     @Test
-    void validateString_shouldRejectEmpty() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateString("   ", "Test Field", 2, 10));
+    void validateString_shouldThrowForTooShort() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateString("A", "Field", 2, 50)
+        );
+        assertTrue(ex.getMessage().contains("must be 2-50 characters"));
     }
 
     @Test
-    void validateString_shouldRejectShortString() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateString("A", "Test Field", 2, 10));
+    void validateString_shouldThrowForTooLong() {
+        String tooLong = "A".repeat(51);
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateString(tooLong, "Field", 2, 50)
+        );
+        assertTrue(ex.getMessage().contains("must be 2-50 characters"));
+    }
+
+    // validateNonEmpty
+    @Test
+    void validateNonEmpty_shouldPassForValidList() {
+        assertDoesNotThrow(() -> ValidationUtils.validateNonEmpty(List.of("item"), "List"));
     }
 
     @Test
-    void validateString_shouldRejectLongString() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateString("ThisIsTooLong", "Test Field", 2, 5));
-    }
-
-    // validateNonEmpty tests
-    @Test
-    void validateNonEmpty_shouldAcceptNonEmptyList() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateNonEmpty(List.of("item"), "Test List"));
+    void validateNonEmpty_shouldThrowForEmptyList() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateNonEmpty(List.of(), "List")
+        );
+        assertTrue(ex.getMessage().contains("cannot be empty"));
     }
 
     @Test
-    void validateNonEmpty_shouldRejectNullList() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateNonEmpty(null, "Test List"));
+    void validateNonEmpty_shouldThrowForNull() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateNonEmpty(null, "List")
+        );
+        assertTrue(ex.getMessage().contains("cannot be empty"));
+    }
+
+    // validateIsoDate
+    @Test
+    void validateIsoDate_shouldPassForValidDate() {
+        assertDoesNotThrow(() -> ValidationUtils.validateIsoDate("2023-05", "Start date"));
     }
 
     @Test
-    void validateNonEmpty_shouldRejectEmptyList() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateNonEmpty(List.of(), "Test List"));
-    }
-
-    // validateIsoDate tests
-    @Test
-    void validateIsoDate_shouldAcceptValidDate() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateIsoDate("2023-12", "Date"));
+    void validateIsoDate_shouldThrowForInvalidFormat() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateIsoDate("2023/05", "Start date")
+        );
+        assertTrue(ex.getMessage().contains("must be in YYYY-MM format"));
     }
 
     @Test
-    void validateIsoDate_shouldRejectInvalidFormat() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateIsoDate("12-2023", "Date"));
+    void validateIsoDate_shouldThrowForUnparsableDate() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateIsoDate("2023-13", "Start date")
+        );
+        assertTrue(ex.getMessage().contains("contains invalid date"));
+    }
+
+    // validatePattern
+    @Test
+    void validatePattern_shouldPassForValidEmail() {
+        assertDoesNotThrow(() ->
+            ValidationUtils.validatePattern("test@example.com", "Email", "EMAIL")
+        );
     }
 
     @Test
-    void validateIsoDate_shouldRejectInvalidDate() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateIsoDate("2023-13", "Date"));
-    }
-
-    // validatePattern tests
-    @Test
-    void validatePattern_shouldAcceptValidEmail() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validatePattern("test@example.com", "Email", "EMAIL"));
+    void validatePattern_shouldThrowForInvalidEmail() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validatePattern("invalid-email", "Email", "EMAIL")
+        );
+        assertTrue(ex.getMessage().contains("Invalid Email format"));
     }
 
     @Test
-    void validatePattern_shouldRejectInvalidEmail() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validatePattern("invalid.com", "Email", "EMAIL"));
+    void validatePattern_shouldThrowForUnknownPatternKey() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ValidationUtils.validatePattern("test", "TestField", "UNKNOWN")
+        );
+        assertEquals("Unknown pattern key: UNKNOWN", ex.getMessage());
     }
 
-    // requireNonNull tests
+    // requireNonNull
     @Test
-    void requireNonNull_shouldAcceptNonNull() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.requireNonNull("object", "Field"));
+    void requireNonNull_shouldThrowIfNull() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.requireNonNull(null, "Field")
+        );
+        assertTrue(ex.getMessage().contains("cannot be null"));
+    }
+
+    // requireNonEmpty
+    @Test
+    void requireNonEmpty_shouldThrowIfEmpty() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.requireNonEmpty("   ", "Field")
+        );
+        assertTrue(ex.getMessage().contains("cannot be empty"));
+    }
+
+    // validateMinSize
+    @Test
+    void validateMinSize_shouldThrowIfListTooSmall() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateMinSize(List.of("A"), 2, "Items")
+        );
+        assertTrue(ex.getMessage().contains("must have at least 2 items"));
+    }
+
+    // validateMaxSize
+    @Test
+    void validateMaxSize_shouldThrowIfListTooLarge() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateMaxSize(List.of("A", "B", "C"), 2, "Items")
+        );
+        assertTrue(ex.getMessage().contains("cannot exceed 2 items"));
+    }
+
+    // validateRange
+    @Test
+    void validateRange_shouldThrowIfBelowMin() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateRange(1, 5, 10, "Number")
+        );
+        assertTrue(ex.getMessage().contains("must be between 5 and 10"));
     }
 
     @Test
-    void requireNonNull_shouldRejectNull() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.requireNonNull(null, "Field"));
-    }
-
-    // Collection size tests
-    @Test
-    void validateMinSize_shouldAcceptValidList() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateMinSize(List.of(1, 2, 3), 2, "List"));
+    void validateRange_shouldThrowIfAboveMax() {
+        InvalidResumeException ex = assertThrows(
+            InvalidResumeException.class,
+            () -> ValidationUtils.validateRange(20, 5, 10, "Number")
+        );
+        assertTrue(ex.getMessage().contains("must be between 5 and 10"));
     }
 
     @Test
-    void validateMinSize_shouldAcceptNullList() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateMinSize(null, 2, "List"));
-    }
-
-    @Test
-    void validateMinSize_shouldRejectSmallList() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateMinSize(List.of(1), 2, "List"));
-    }
-
-    @Test
-    void validateMaxSize_shouldAcceptValidList() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateMaxSize(List.of(1, 2), 3, "List"));
-    }
-
-    @Test
-    void validateMaxSize_shouldAcceptNullList() {
-        assertDoesNotThrow(() -> 
-            ValidationUtils.validateMaxSize(null, 2, "List"));
-    }
-
-    @Test
-    void validateMaxSize_shouldRejectLargeList() {
-        assertThrows(InvalidResumeException.class, () -> 
-            ValidationUtils.validateMaxSize(List.of(1, 2, 3), 2, "List"));
+    void validateRange_shouldPassIfWithinBounds() {
+        assertDoesNotThrow(() -> ValidationUtils.validateRange(7, 5, 10, "Number"));
     }
 }

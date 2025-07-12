@@ -1,31 +1,55 @@
 package org.adeniuobesu.adapters.output;
 
-import org.adeniuobesu.core.models.*;
-import org.adeniuobesu.core.ports.OutputPort;
+import org.adeniuobesu.adapters.exceptions.AdapterException;
+import org.adeniuobesu.adapters.models.OutputType;
+import org.adeniuobesu.application.dtos.ContactMethodDto;
+import org.adeniuobesu.application.dtos.EducationDto;
+import org.adeniuobesu.application.dtos.HobbyDto;
+import org.adeniuobesu.application.dtos.LanguageDto;
+import org.adeniuobesu.application.dtos.ResumeDto;
+import org.adeniuobesu.application.dtos.SkillCategoryDto;
+import org.adeniuobesu.application.dtos.WorkExperienceDto;
+import org.adeniuobesu.application.ports.OutputStrategy;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class MarkdownOutputAdapter implements OutputPort<Resume> {
-    private final Path outputPath;
-
-    public MarkdownOutputAdapter(Path outputPath) {
-        this.outputPath = outputPath;
-    }
+public final class MarkdownExporter implements OutputStrategy<ResumeDto> {
+    private static final OutputType OUTPUT_TYPE = OutputType.MARKDOWN;
 
     @Override
-    public void generate(Resume resume) {
+    public void generate(ResumeDto resume, OutputStream outputStream) throws AdapterException {
         try {
+            validateInput(resume, outputStream);
             String markdown = buildMarkdown(resume);
-            Files.write(outputPath, markdown.getBytes());
+            writeToStream(markdown, outputStream);
+        } catch (IllegalArgumentException e) {
+            throw new AdapterException("Invalid input parameters: " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate Markdown file", e);
+            throw new AdapterException(
+                "Failed to generate MARKDOWN output to stream: " + e.getMessage(), 
+                e
+            );
         }
     }
 
-    private String buildMarkdown(Resume resume) {
+    private void validateInput(ResumeDto resume, OutputStream outputStream) {
+        if (resume == null) {
+            throw new IllegalArgumentException("Resume cannot be null");
+        }
+        if (outputStream == null) {
+            throw new IllegalArgumentException("Output stream cannot be null");
+        }
+    }
+
+    private void writeToStream(String markdown, OutputStream outputStream) throws IOException {
+        outputStream.write(markdown.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private String buildMarkdown(ResumeDto resume) {
         return String.format("""
             # %s
             ## %s
@@ -66,13 +90,13 @@ public final class MarkdownOutputAdapter implements OutputPort<Resume> {
         return summary != null ? summary + "\n" : "";
     }
 
-    private String formatContactMethods(List<ContactMethod> methods) {
+    private String formatContactMethods(List<ContactMethodDto> methods) {
         return methods.stream()
             .map(m -> "- **" + m.type() + "**: " + m.value())
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatWorkExperiences(List<WorkExperience> experiences) {
+    private String formatWorkExperiences(List<WorkExperienceDto> experiences) {
         return experiences.stream()
             .map(exp -> String.format("""
                 ### %s
@@ -95,7 +119,7 @@ public final class MarkdownOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatEducation(List<Education> education) {
+    private String formatEducation(List<EducationDto> education) {
         return education.stream()
             .map(edu -> String.format("""
                 ### %s
@@ -110,7 +134,7 @@ public final class MarkdownOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatSkills(List<SkillCategory> skills) {
+    private String formatSkills(List<SkillCategoryDto> skills) {
         return skills.stream()
             .map(skill -> String.format("""
                 ### %s
@@ -124,13 +148,13 @@ public final class MarkdownOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatLanguages(List<Language> languages) {
+    private String formatLanguages(List<LanguageDto> languages) {
         return languages.stream()
             .map(lang -> "- " + lang.language() + " (" + lang.proficiency() + ")")
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatHobbies(List<Hobby> hobbies) {
+    private String formatHobbies(List<HobbyDto> hobbies) {
         return hobbies.stream()
             .map(hobby -> String.format("""
                 - **%s**: %s

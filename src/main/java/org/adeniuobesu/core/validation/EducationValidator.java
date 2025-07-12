@@ -4,51 +4,67 @@ import org.adeniuobesu.core.exceptions.InvalidResumeException;
 import org.adeniuobesu.core.models.Education;
 
 public final class EducationValidator {
-    // Constants for validation rules
+    // Constants for validation rules - good use of constants
     private static final int MIN_INSTITUTION_LENGTH = 2;
     private static final int MAX_INSTITUTION_LENGTH = 100;
     private static final int MIN_DEGREE_LENGTH = 2;
     private static final int MAX_DEGREE_LENGTH = 50;
+    private static final int MIN_FIELD_OF_STUDY_LENGTH = 2;
+    private static final int MAX_FIELD_OF_STUDY_LENGTH = 50;
+
+    // Private constructor to prevent instantiation - good for utility class
+    private EducationValidator() {}
 
     public static void validate(Education education) {
-        ValidationUtils.requireNonNull(education, "Education entry");
+        if (education == null) {
+            throw new InvalidResumeException("Education", "cannot be null");
+        }
         
-        // Institution validation
+        validateInstitution(education.institutionName());
+        validateDegree(education.degree());
+        validateFieldOfStudy(education.fieldOfStudy());
+        validateDates(education.startDate(), education.endDate(), education.institutionName());
+    }
+
+    private static void validateInstitution(String institution) {
         ValidationUtils.validateString(
-            education.institutionName(),
+            institution,
             "Institution name",
             MIN_INSTITUTION_LENGTH,
             MAX_INSTITUTION_LENGTH
         );
+    }
 
-        // Degree validation
+    private static void validateDegree(String degree) {
         ValidationUtils.validateString(
-            education.degree(),
+            degree,
             "Degree",
             MIN_DEGREE_LENGTH,
             MAX_DEGREE_LENGTH
         );
+    }
 
-        // Field of study (optional)
-        if (education.fieldOfStudy() != null) {
+    private static void validateFieldOfStudy(String fieldOfStudy) {
+        if (fieldOfStudy != null) {
             ValidationUtils.validateString(
-                education.fieldOfStudy(),
+                fieldOfStudy,
                 "Field of study",
-                2,
-                50
+                MIN_FIELD_OF_STUDY_LENGTH,
+                MAX_FIELD_OF_STUDY_LENGTH
             );
         }
+    }
 
-        // Date validation
-        ValidationUtils.validateIsoDate(education.startDate(), "Start date");
-        if (education.endDate() != null) {
-            ValidationUtils.validateIsoDate(education.endDate(), "End date");
+    private static void validateDates(String startDate, String endDate, String institutionName) {
+        ValidationUtils.validateIsoDate(startDate, "Start date");
+        
+        if (endDate != null) {
+            ValidationUtils.validateIsoDate(endDate, "End date");
             
-            // Verify date ordering
-            if (education.endDate().compareTo(education.startDate()) < 0) {
+            if (endDate.compareTo(startDate) < 0) {
                 throw new InvalidResumeException(
-                    "Education end date cannot be before start date for " + 
-                    education.institutionName()
+                    "Education dates",
+                    String.format("End date cannot be before start date for %s", institutionName)
                 );
             }
         }

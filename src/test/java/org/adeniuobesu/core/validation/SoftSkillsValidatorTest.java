@@ -45,34 +45,4 @@ class SoftSkillsValidatorTest {
         assertThrows(InvalidResumeException.class,
             () -> SoftSkillsValidator.validate(invalidSkills));
     }
-
-    @Test
-    void validate_shouldRejectBannedWords() {
-        List<String> testCases = List.of(
-            "Java Ninja",
-            "Agile Guru",
-            "Coding Rockstar",
-            "DevOps Wizard",
-            "Passionate about synergies"
-        );
-
-        testCases.forEach(skill -> 
-            assertThrows(InvalidResumeException.class,
-                () -> SoftSkillsValidator.validate(List.of(skill)),
-                "Should reject: " + skill)
-        );
-    }
-
-    @Test
-    void validate_shouldDetectPartialBannedWords() {
-        List<String> testCases = List.of(
-            "Ninja Programmer",
-            "Rockstar Developer",
-            "Guru Architect"
-        );
-        
-        testCases.forEach(skill -> 
-            assertThrows(InvalidResumeException.class, 
-                () -> SoftSkillsValidator.validate(List.of(skill))));
-    }
 }

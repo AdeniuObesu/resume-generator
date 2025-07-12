@@ -1,6 +1,6 @@
-# Resume Generator (Hexagonal Architecture)
+# Resume Generator (Hexagonal Architecture, Clean and Tested)
 
-A tribute to Uncle Bob — whose work shaped my thinking as a software engineer.
+> "A tribute to Uncle Bob — whose work shaped my thinking as a software engineer."
 
 As a passionate believer in clean code and software craftsmanship, this project is the result of my deep dive into Clean Architecture by Robert C. Martin.
 It’s a résumé generator written in Java, structured with Hexagonal Architecture (Ports & Adapters) to ensure clarity, testability, and long-term maintainability.
@@ -10,11 +10,14 @@ This isn’t just a tool — it’s a practical application of architectural pri
 
 ## ✨ Features
 
-- ✅ CLI-driven resume generation (`resume.json` ➜ `resume.pdf`)
-- ✅ Hexagonal architecture: domain logic is fully isolated from I/O concerns
-- ✅ Extensible output formats (PDF, HTML, JSON)
-- ✅ AI-ready: supports pluggable AI-based summary generation
-- ✅ Pure Java (no Spring) – fast startup, minimal dependencies
+- ✅ **CLI-driven résumé generation** (`resume.text` ➜ `resume.pdf`...)
+- ✅ **Hexagonal architecture** with strict boundaries
+- ✅ **DTO mapping** between layers (core ↔ application)
+- ✅ **ArchUnit tests** enforce clean architecture rules
+- ✅ **Pluggable I/O strategies** via input/output ports
+- ✅ **Extensible output formats** (PDF, HTML, Markdown, Text)
+- ✅ **AI-ready**: future support for LLM-based summarization
+- ✅ **Minimal dependencies** – no Spring Boot, pure Java
 
 ---
 
@@ -42,25 +45,30 @@ mvn test
 ```
 
 ## 📁 Project Structure (Hexagonal)
+
 ```bash
 src/
-├── core/                  # Domain logic (models, services, exceptions, ports)
-│   ├── models/            # Resume, ContactMethod, etc.
-│   ├── validation/        # Domain validation logic
-│   └── ports/             # Input/Output contracts (interfaces)
-├── application/           # Use cases (e.g., BuildResumeUseCase)
-├── adapters/              # Implementations for input/output ports
-│   ├── input/
-│   │   ├── JSON           # Current json input adapter
-│   │   ├── cli            # Future CLI input adapter
-│   │   └── web            # Future REST adapter
-│   └── output/
-│       ├── pdf            # PDF generator
-│       └── json           # JSON file support
-│       └── ...            # As many as you want to implement...
-├── infrastructure/        # Composition root (Main.java, config)
+├── core/
+│   ├── models/              # Resume, ContactMethod, etc.
+│   ├── validation/          # Domain validators
+│   └── exceptions/          # Domain-level exceptions
+│
+├── application/
+│   ├── usecases/            # BuildResumeUseCase, etc.
+│   ├── ports/               # Input/OutputStrategy<T>
+│   ├── dtos/                # ResumeDto, etc.
+│   └── mappers/             # ResumeMapper: DTO ↔ Domain
+│
+├── adapters/
+│   ├── input/               # JsonInputStrategy, CliInputStrategy
+│   └── output/              # PdfExporter, HtmlExporter, etc.
+│
+├── infrastructure/
+│   ├── factories/           # Strategy factories
+│   └── Main.java            # Entry point and composition root
+│
 └── resources/
-    └── samples/           # Example JSON resumes
+    └── samples/             # Example JSON input files
 ```
 
 ## 🧱 Clean Architecture Principles
@@ -69,14 +77,70 @@ src/
 * Adapters = Replaceable: Swap CLI for Web, JSON for DB, or add AI summaries — no impact on core.
 * Testable: Business logic tested with mocked ports — no need to touch infrastructure.
 
-## 🛣️ Roadmap
-1. Add RESTful web interface
-2. Add database persistence (MySQL, PostgreSQL or MongoDB)
-3. Support more input formats (YAML, XML)
-4. UI layer (HTML/JS) to generate resumes visually
-5. Add HTML output adapter
-6. Integrate AI summary (e.g., OpenAI GPT)
+| Layer          | Knows About           | Never Knows About      |
+| -------------- | --------------------- | ---------------------- |
+| Core           | Business rules        | CLI, PDF, frameworks   |
+| Application    | Use cases, DTOs       | Infrastructure, UI     |
+| Adapters       | Port interfaces       | Domain logic internals |
+| Infrastructure | Factories, config     | Core implementation    |
 
+### Layered dependencies (from inner to outer)
+
+```yaml
+[ Core Domain ]
+  ↳ Models: Resume, Experience, Education...
+  ↳ Rules: Validation, Exceptions
+        |
+[ Application Layer ]
+  ↳ Use cases: BuildResumeUseCase
+  ↳ Ports: InputStrategy<T>, OutputStrategy<T>
+  ↳ Mappers: DTO ↔ Domain
+        |
+[ Adapters (I/O) ]
+  ↳ Input: JSON, CLI
+  ↳ Output: PDF, HTML, Markdown, Text
+        |
+[ Infrastructure ]
+  ↳ Factories, Configuration, Composition root (Main.java)
+```
+
+### Dependency Rule
+> Inner layers know nothing about outer layers.
+* core knows nothing about application or adapters.
+* application defines ports that adapters implement.
+* adapters are plugin modules around the clean core.
+
+## Extending the system
+Want to add a REST API? AI summaries? YAML input?
+Just add new adapters — no need to touch the business rules.
+### Plug In a New Input Format:
+* Implement InputStrategy
+* Register it via the InputStrategyFactory
+### Add a New Output Format:
+* Implement OutputStrategy
+* Register in OutputStrategyFactory
+### Introduce a New Use Case:
+* Add it to the application.usecases package
+* It’ll interact with ports and domain models
+
+## 🛣️ Roadmap
+1. ✅ Clean Architecture + CLI support
+2. ✅ HTML output adapter
+3. ⏳ RESTful web interface (Spring Boot or Micronaut, optional)
+4. ⏳ Persistent storage (MySQL / PostgreSQL / MongoDB)
+5. ⏳ Visual UI: HTML + JS Resume Builder
+6. ⏳ AI summary integration (OpenAI GPT, Claude, etc.)
+7. ⏳ More input formats: YAML, XML
+
+## Why this matters
+We don’t write software to please the compiler — we write it for humans to read and maintain.
+This project is an exercise in clarity:
+* No service soup.
+* No dependency injection frameworks.
+* No leaky abstractions.
+Just `pure intent`, `good design`, and `testable code`.
 
 ## 👨‍💻 Author
-Project by [@Moukhafi-Anass](https://github.com/adeniuobesu) — built to demonstrate true Clean Architecture in action.
+Project by [@Moukhafi-Anass](https://github.com/adeniuobesu)
+> "This project is my homage to Clean Architecture and the timeless lessons of Robert C. Martin." — Moukhafi Anass
+> "The only way to go fast is to go well." — Uncle Bob (Robert C. Martin)
