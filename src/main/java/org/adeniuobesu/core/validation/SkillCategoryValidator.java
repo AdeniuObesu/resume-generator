@@ -12,50 +12,72 @@ public final class SkillCategoryValidator {
     private static final int MIN_SKILL_LENGTH = 2;
     private static final int MAX_SKILL_LENGTH = 30;
     private static final int MAX_SKILLS_PER_CATEGORY = 15;
+    private static final String CATEGORY_FIELD = "Skill category";
+    private static final String SKILLS_FIELD = "Skills list";
+    private static final String SKILL_FIELD = "Technical skill";
+
+    // Prevent instantiation
+    private SkillCategoryValidator() {}
 
     public static void validate(SkillCategory category) {
-        ValidationUtils.requireNonNull(category, "Skill category");
+        if (category == null) {
+            throw new InvalidResumeException(CATEGORY_FIELD, "cannot be null");
+        }
 
-        // Category name validation
-        ValidationUtils.validateString(
-            category.categoryName(),
-            "Skill category name",
-            MIN_CATEGORY_LENGTH,
-            MAX_CATEGORY_LENGTH
-        );
-
-        // Skills validation
+        validateCategoryName(category.categoryName());
         validateSkills(category.skills());
     }
 
-    private static void validateSkills(List<String> skills) {
-        ValidationUtils.validateNonEmpty(skills, "Skills list");
+    private static void validateCategoryName(String categoryName) {
+        ValidationUtils.validateString(
+            categoryName,
+            CATEGORY_FIELD,
+            MIN_CATEGORY_LENGTH,
+            MAX_CATEGORY_LENGTH
+        );
+    }
 
+    private static void validateSkills(List<String> skills) {
+        validateSkillsListNotEmpty(skills);
+        validateSkillsListSize(skills);
+        validateEachSkill(skills);
+        validateNoDuplicateSkills(skills);
+    }
+
+    private static void validateSkillsListNotEmpty(List<String> skills) {
+        if (skills == null || skills.isEmpty()) {
+            throw new InvalidResumeException(SKILLS_FIELD, "cannot be empty");
+        }
+    }
+
+    private static void validateSkillsListSize(List<String> skills) {
         if (skills.size() > MAX_SKILLS_PER_CATEGORY) {
             throw new InvalidResumeException(
-                String.format("Maximum %d skills per category allowed (found %d)", 
-                    MAX_SKILLS_PER_CATEGORY, 
-                    skills.size())
+                SKILLS_FIELD,
+                String.format("exceeds maximum of %d skills", MAX_SKILLS_PER_CATEGORY)
             );
         }
+    }
 
+    private static void validateEachSkill(List<String> skills) {
         skills.forEach(skill -> 
             ValidationUtils.validateString(
                 skill,
-                "Technical skill",
+                SKILL_FIELD,
                 MIN_SKILL_LENGTH,
                 MAX_SKILL_LENGTH
             )
         );
+    }
 
-        // Check for duplicates (case-insensitive)
+    private static void validateNoDuplicateSkills(List<String> skills) {
         long uniqueSkills = skills.stream()
             .map(String::toLowerCase)
             .distinct()
             .count();
         
         if (uniqueSkills != skills.size()) {
-            throw new InvalidResumeException("Duplicate skills detected in category");
+            throw new InvalidResumeException(SKILLS_FIELD, "contains duplicate skills");
         }
     }
 }

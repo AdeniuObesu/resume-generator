@@ -1,153 +1,211 @@
 package org.adeniuobesu.core.validation;
 
-import org.adeniuobesu.core.models.*;
 import org.adeniuobesu.core.exceptions.InvalidResumeException;
+import org.adeniuobesu.core.models.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ResumeValidatorTest {
 
+    private ResumeValidator validator;
+
+    @BeforeEach
+    void setUp() {
+        validator = new ResumeValidator();
+    }
+
     private Resume createValidResume() {
         return new Resume(
-            "John Doe", 
-            "Software Engineer",
-            "Experienced Java developer with 5+ years",
+            "John Doe",
+            "Senior Software Engineer",
+            "Passionate software engineer with 10+ years of experience building scalable applications.",
             List.of(new ContactMethod(ContactType.EMAIL, "john@example.com")),
-            List.of("Communication", "Teamwork"),
-            List.of(createValidWorkExperience()),
-            List.of(
-                new Education(
-                    "Stanford",
-                    "BS",
-                    "Computer Science",
-                    "2016-09",
-                    "2020-06"
-                )
-            ),
+            List.of("Teamwork", "Adaptability"),
+            List.of(new WorkExperience("TechCorp", "Lead Developer", "2015-01", "2020-12", List.of("Built microservices"))),
+            List.of(new Education("MIT", "BSc", "Computer Science", "2010-09", "2014-06")),
             List.of(new SkillCategory("Programming", List.of("Java", "Python"))),
-            List.of(new Hobby("Reading", "Technical books")),
-            List.of(new Language("English", LanguageProficiency.FLUENT))
-        );
-    }
-
-    private WorkExperience createValidWorkExperience() {
-        return new WorkExperience(
-            "Tech Company",
-            "Senior Developer",
-            "2022-01",
-            "2023-12",
-            List.of(
-                "Led a team of 5 developers to deliver major features",
-                "Improved system performance by 40% through optimization"
-            )
+            List.of(new Hobby("Hiking", "Mountain hiking every weekend")),
+            List.of(new Language("English", LanguageProficiency.NATIVE))
         );
     }
 
     @Test
-    void validate_shouldAcceptValidResume() {
-        assertDoesNotThrow(() -> ResumeValidator.validate(createValidResume()));
+    void testValidResumeDoesNotThrow() {
+        Resume resume = createValidResume();
+        assertDoesNotThrow(() -> validator.validate(resume));
     }
 
     @Test
-    void validate_shouldRejectNullResume() {
-        assertThrows(InvalidResumeException.class, 
-            () -> ResumeValidator.validate(null));
+    void testNullResumeThrows() {
+        assertThrows(InvalidResumeException.class, () -> validator.validate(null));
     }
 
     @Test
-    void validate_shouldRejectInvalidContactMethod() {
+    void testInvalidFullNameTooShortThrows() {
+        Resume resume = createValidResume();
         Resume invalid = new Resume(
-            "John Doe", "Title", "Summary",
-            List.of(new ContactMethod(null, "value")),
-            List.of(), 
-            List.of(createValidWorkExperience()),
-            List.of(), List.of(), List.of(), List.of()
+            "J",
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
         );
-        assertThrows(InvalidResumeException.class,
-            () -> ResumeValidator.validate(invalid));
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
     }
 
     @Test
-    void validate_shouldRejectMissingWorkExperience() {
+    void testFullNameTooLongThrows() {
+        Resume resume = createValidResume();
+        String tooLongName = "A".repeat(101);
         Resume invalid = new Resume(
-            "Name", "Title", "Summary",
-            List.of(new ContactMethod(ContactType.EMAIL, "test@example.com")),
-            List.of(), 
-            List.of(), // Missing required work experience
-            List.of(), List.of(), List.of(), List.of()
+            tooLongName,
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
         );
-        assertThrows(InvalidResumeException.class,
-            () -> ResumeValidator.validate(invalid));
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
     }
 
     @Test
-    void validate_shouldAcceptEmptyOptionalCollections() {
-        Resume valid = new Resume(
-            "Name", "Title", null,
-            List.of(new ContactMethod(ContactType.EMAIL, "test@example.com")),
-            null, 
-            List.of(new WorkExperience(
-                "Company", 
-                "Developer",
-                "2020-01", 
-                "2023-12",
-                List.of("Implemented key features for the core product"))),
-            List.of(),
-            List.of(),
-            List.of(),
-            List.of()
-        );
-        assertDoesNotThrow(() -> ResumeValidator.validate(valid));
-    }
-
-    @Test
-    void validate_shouldRejectInvalidEducationDates() {
+    void testProfessionalTitleTooShortThrows() {
+        Resume resume = createValidResume();
         Resume invalid = new Resume(
-            "Name", "Title", "Summary",
-            List.of(new ContactMethod(ContactType.EMAIL, "test@example.com")),
-            List.of(),
-            List.of(createValidWorkExperience()),
-            List.of(new Education("Uni", "Degree", "Field", "invalid", "date")),
-            List.of(), List.of(), List.of()
+            resume.fullName(),
+            "Dev", // shorter than expected min length
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
         );
-        assertThrows(InvalidResumeException.class,
-            () -> ResumeValidator.validate(invalid));
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
     }
 
     @Test
-    void validate_shouldRejectEmptyAchievements() {
+    void testMissingContactMethodsThrows() {
+        Resume resume = createValidResume();
         Resume invalid = new Resume(
-            "Name", "Title", "Summary",
-            List.of(new ContactMethod(ContactType.EMAIL, "test@example.com")),
-            List.of(),
-            List.of(new WorkExperience(
-                "Company", 
-                "Developer",
-                "2020-01", 
-                "2023-12",
-                List.of())), // Empty achievements
-            List.of(), List.of(), List.of(), List.of()
+            resume.fullName(),
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            Collections.emptyList(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
         );
-        assertThrows(InvalidResumeException.class,
-            () -> ResumeValidator.validate(invalid));
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
     }
 
     @Test
-    void validate_shouldRejectShortAchievements() {
+    void testMissingWorkExperienceThrows() {
+        Resume resume = createValidResume();
         Resume invalid = new Resume(
-            "Name", "Title", "Summary",
-            List.of(new ContactMethod(ContactType.EMAIL, "test@example.com")),
-            List.of(),
-            List.of(new WorkExperience(
-                "Company", 
-                "Developer",
-                "2020-01", 
-                "2023-12",
-                List.of("Too short"))), // Achievement too short
-            List.of(), List.of(), List.of(), List.of()
+            resume.fullName(),
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            resume.softSkills(),
+            Collections.emptyList(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
         );
-        assertThrows(InvalidResumeException.class,
-            () -> ResumeValidator.validate(invalid));
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
+    }
+
+    @Test
+    void testProfessionalSummaryTooShortThrows() {
+        Resume resume = createValidResume();
+        Resume invalid = new Resume(
+            resume.fullName(),
+            resume.professionalTitle(),
+            "Short", // summary less than minimum length (ex: 10)
+            resume.contactMethods(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
+        );
+        assertThrows(InvalidResumeException.class, () -> validator.validate(invalid));
+    }
+
+    @Test
+    void testNullProfessionalSummaryIsAllowed() {
+        Resume resume = createValidResume();
+        Resume modified = new Resume(
+            resume.fullName(),
+            resume.professionalTitle(),
+            null, // summary can be null
+            resume.contactMethods(),
+            resume.softSkills(),
+            resume.workExperiences(),
+            resume.educationHistory(),
+            resume.skillCategories(),
+            resume.hobbies(),
+            resume.languages()
+        );
+        assertDoesNotThrow(() -> validator.validate(modified));
+    }
+
+    @Test
+    void testOptionalCollectionsCanBeNullOrEmpty() {
+        Resume resume = createValidResume();
+        Resume modified = new Resume(
+            resume.fullName(),
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            null, // softSkills null
+            resume.workExperiences(),
+            null, // educationHistory null
+            null, // skillCategories null
+            null, // hobbies null
+            null  // languages null
+        );
+        assertDoesNotThrow(() -> validator.validate(modified));
+    }
+
+    @Test
+    void testOptionalCollectionWithEmptyListIsAllowed() {
+        Resume resume = createValidResume();
+        Resume modified = new Resume(
+            resume.fullName(),
+            resume.professionalTitle(),
+            resume.professionalSummary(),
+            resume.contactMethods(),
+            List.of(), // empty softSkills
+            resume.workExperiences(),
+            List.of(), // empty educationHistory
+            List.of(), // empty skillCategories
+            List.of(), // empty hobbies
+            List.of()  // empty languages
+        );
+        assertDoesNotThrow(() -> validator.validate(modified));
     }
 }

@@ -1,33 +1,49 @@
 package org.adeniuobesu.adapters.output;
 
-import org.adeniuobesu.core.models.*;
-import org.adeniuobesu.core.ports.OutputPort;
+import org.adeniuobesu.adapters.exceptions.AdapterException;
+import org.adeniuobesu.adapters.models.OutputType;
+import org.adeniuobesu.application.ports.OutputStrategy;
+import org.adeniuobesu.application.dtos.*;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class TextOutputAdapter implements OutputPort<Resume> {
-    private final Path outputPath;
+public final class TextExporter implements OutputStrategy<ResumeDto> {
+
     private static final String SECTION_BREAK = "\n" + "-".repeat(80) + "\n";
-    private static final String SUBSECTION_BREAK = "\n" + "~".repeat(60) + "\n";
-
-    public TextOutputAdapter(Path outputPath) {
-        this.outputPath = outputPath;
-    }
-
+    private static final String SUBSECTION_BREAK = "\n" + "~".repeat(60) + "\n";private static final OutputType OUTPUT_TYPE = OutputType.TEXT;
+    
     @Override
-    public void generate(Resume resume) {
+    public void generate(ResumeDto resume, OutputStream outputStream) throws AdapterException {
         try {
+            validateInput(resume, outputStream);
             String text = buildTextResume(resume);
-            Files.write(outputPath, text.getBytes());
+            writeToStream(text, outputStream);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate text file", e);
+            throw new AdapterException(
+                "Failed to generate TEXT output: " + e.getMessage(),
+                e
+            );
         }
     }
 
-    private String buildTextResume(Resume resume) {
+    private void validateInput(ResumeDto resume, OutputStream outputStream) {
+        if (resume == null) {
+            throw new IllegalArgumentException("Resume cannot be null");
+        }
+        if (outputStream == null) {
+            throw new IllegalArgumentException("Output stream cannot be null");
+        }
+    }
+
+    private void writeToStream(String text, OutputStream outputStream) throws IOException {
+        outputStream.write(text.getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+    }
+
+    private String buildTextResume(ResumeDto resume) {
         return String.format("""
             %s
             %s
@@ -65,13 +81,13 @@ public final class TextOutputAdapter implements OutputPort<Resume> {
         return wrapText(summary != null ? summary : "", 80) + "\n";
     }
 
-    private String formatContactMethods(List<ContactMethod> methods) {
+    private String formatContactMethods(List<ContactMethodDto> methods) {
         return methods.stream()
             .map(m -> String.format("%-10s: %s", m.type(), m.value()))
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatWorkExperiences(List<WorkExperience> experiences) {
+    private String formatWorkExperiences(List<WorkExperienceDto> experiences) {
         return experiences.stream()
             .map(exp -> String.format("%s\n%s\n%s - %s\n\n%s",
                 exp.companyName().toUpperCase(),
@@ -92,7 +108,7 @@ public final class TextOutputAdapter implements OutputPort<Resume> {
         );
     }
 
-    private String formatEducation(List<Education> education) {
+    private String formatEducation(List<EducationDto> education) {
         return education.stream()
             .map(edu -> String.format("%s\n%s%s\n%s - %s",
                 edu.institutionName().toUpperCase(),
@@ -104,7 +120,7 @@ public final class TextOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining(SUBSECTION_BREAK));
     }
 
-    private String formatSkills(List<SkillCategory> skills) {
+    private String formatSkills(List<SkillCategoryDto> skills) {
         return skills.stream()
             .map(skill -> String.format("%s:\n%s",
                 skill.categoryName().toUpperCase(),
@@ -116,7 +132,7 @@ public final class TextOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining("\n\n"));
     }
 
-    private String formatLanguages(List<Language> languages) {
+    private String formatLanguages(List<LanguageDto> languages) {
         return languages.stream()
             .map(lang -> String.format("%-15s (%s)", 
                 lang.language(), 
@@ -124,7 +140,7 @@ public final class TextOutputAdapter implements OutputPort<Resume> {
             .collect(Collectors.joining("\n"));
     }
 
-    private String formatHobbies(List<Hobby> hobbies) {
+    private String formatHobbies(List<HobbyDto> hobbies) {
         return hobbies.stream()
             .map(hobby -> String.format("%s%s",
                 hobby.name(),

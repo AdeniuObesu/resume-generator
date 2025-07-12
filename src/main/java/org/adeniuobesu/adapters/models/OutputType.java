@@ -1,4 +1,4 @@
-package org.adeniuobesu.core.models;
+package org.adeniuobesu.adapters.models;
 
 public enum OutputType {
     PDF,

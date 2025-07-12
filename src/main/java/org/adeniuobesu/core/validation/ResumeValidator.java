@@ -1,73 +1,114 @@
 package org.adeniuobesu.core.validation;
 
+import java.util.List;
+
 import org.adeniuobesu.core.models.Resume;
 
 public final class ResumeValidator {
-    // Configuration
+    // Configuration constants
     private static final int MAX_SUMMARY_LENGTH = 500;
     private static final int MIN_RESUME_ITEMS = 1;
     private static final int MIN_CONTACT_METHODS = 1;
+    private static final int MIN_NAME_LENGTH = 2;
+    private static final int MAX_NAME_LENGTH = 100;
+    private static final int MIN_TITLE_LENGTH = 5;
+    private static final int MAX_TITLE_LENGTH = 100;
+    private static final int MIN_SUMMARY_LENGTH = 10;
 
-    public static void validate(Resume resume) {
-        ValidationUtils.requireNonNull(resume, "Resume");
+    // Field name constants
+    private static final String RESUME_FIELD = "Resume";
+    private static final String FULL_NAME_FIELD = "Full name";
+    private static final String PROFESSIONAL_TITLE_FIELD = "Professional title";
+    private static final String PROFESSIONAL_SUMMARY_FIELD = "Professional summary";
+    private static final String CONTACT_METHODS_FIELD = "Contact methods";
+    private static final String WORK_EXPERIENCES_FIELD = "Work experiences";
+    private static final String EDUCATION_HISTORY_FIELD = "Education history";
+    private static final String LANGUAGES_FIELD = "Languages";
+
+    public ResumeValidator() {}
+
+    public void validate(Resume resume) {
         validateRequiredFields(resume);
         validateCollections(resume);
-
-        // Deep validation (order matches model field order)
-        resume.contactMethods().forEach(ContactMethodValidator::validate);
-        resume.workExperiences().forEach(WorkExperienceValidator::validate);
-        resume.educationHistory().forEach(EducationValidator::validate);
-        resume.skillCategories().forEach(SkillCategoryValidator::validate);
-        resume.languages().forEach(LanguageValidator::validate);
-        resume.hobbies().forEach(HobbyValidator::validate);
-        
-        // Soft skills (explicit null check)
-        if (resume.softSkills() != null && !resume.softSkills().isEmpty()) {
-            SoftSkillsValidator.validate(resume.softSkills());
-        }
+        validateNestedEntities(resume);
     }
 
     private static void validateRequiredFields(Resume resume) {
-        ValidationUtils.validateString(resume.fullName(), "Full name", 2, 100);
-        ValidationUtils.validateString(resume.professionalTitle(), "Professional title", 5, 100);
+        ValidationUtils.requireNonNull(resume, RESUME_FIELD);
+        
+        ValidationUtils.validateString(
+            resume.fullName(),
+            FULL_NAME_FIELD,
+            MIN_NAME_LENGTH,
+            MAX_NAME_LENGTH
+        );
+        
+        ValidationUtils.validateString(
+            resume.professionalTitle(),
+            PROFESSIONAL_TITLE_FIELD,
+            MIN_TITLE_LENGTH,
+            MAX_TITLE_LENGTH
+        );
         
         if (resume.professionalSummary() != null) {
             ValidationUtils.validateString(
-                resume.professionalSummary(), 
-                "Professional summary", 
-                10, 
+                resume.professionalSummary(),
+                PROFESSIONAL_SUMMARY_FIELD,
+                MIN_SUMMARY_LENGTH,
                 MAX_SUMMARY_LENGTH
             );
         }
     }
 
     private static void validateCollections(Resume resume) {
-        // Required collections
         ValidationUtils.validateMinSize(
-            resume.contactMethods(), 
+            resume.contactMethods(),
             MIN_CONTACT_METHODS,
-            "Contact methods"
+            CONTACT_METHODS_FIELD
         );
+        
         ValidationUtils.validateMinSize(
             resume.workExperiences(),
             MIN_RESUME_ITEMS,
-            "Work experiences"
+            WORK_EXPERIENCES_FIELD
         );
+        
+        validateOptionalCollection(resume.educationHistory(), EDUCATION_HISTORY_FIELD);
+        validateOptionalCollection(resume.languages(), LANGUAGES_FIELD);
+    }
 
-        // Optional collections
-        if (!resume.educationHistory().isEmpty()) {
+    private static void validateOptionalCollection(List<?> collection, String fieldName) {
+        if (collection != null && !collection.isEmpty()) {
             ValidationUtils.validateMinSize(
-                resume.educationHistory(), 
-                MIN_RESUME_ITEMS, 
-                "Education history"
+                collection,
+                MIN_RESUME_ITEMS,
+                fieldName
             );
         }
-        if (!resume.languages().isEmpty()) {
-            ValidationUtils.validateMinSize(
-                resume.languages(), 
-                MIN_RESUME_ITEMS, 
-                "Languages"
-            );
+    }
+
+    private static void validateNestedEntities(Resume resume) {
+        resume.contactMethods().forEach(ContactMethodValidator::validate);
+        resume.workExperiences().forEach(WorkExperienceValidator::validate);
+        
+        if (resume.educationHistory() != null) {
+            resume.educationHistory().forEach(EducationValidator::validate);
+        }
+        
+        if (resume.skillCategories() != null) {
+            resume.skillCategories().forEach(SkillCategoryValidator::validate);
+        }
+        
+        if (resume.languages() != null) {
+            resume.languages().forEach(LanguageValidator::validate);
+        }
+        
+        if (resume.hobbies() != null) {
+            resume.hobbies().forEach(HobbyValidator::validate);
+        }
+        
+        if (resume.softSkills() != null) {
+            SoftSkillsValidator.validate(resume.softSkills());
         }
     }
 }
