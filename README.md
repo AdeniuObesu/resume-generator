@@ -110,7 +110,7 @@ src/
 * application defines ports that adapters implement.
 * adapters are plugin modules around the clean core.
 
-## Extending the system
+## 🔄 Extending the system
 Want to add a REST API? AI summaries? YAML input?
 Just add new adapters — no need to touch the business rules.
 ### Plug In a New Input Format:
@@ -142,5 +142,7 @@ Just `pure intent`, `good design`, and `testable code`.
 
 ## 👨‍💻 Author
 Project by [@Moukhafi-Anass](https://github.com/adeniuobesu)
+
 > "This project is my homage to Clean Architecture and the timeless lessons of Robert C. Martin." — Moukhafi Anass
+
 > "The only way to go fast is to go well." — Uncle Bob (Robert C. Martin)
